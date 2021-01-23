@@ -127,4 +127,18 @@ router.put("/todoupdate", (req,res)=>{
     })
 })
 
+router.get("/search/:quary",(req,res)=>{
+    TODO.find(
+        { "title": { "$regex": req.params.quary, "$options": "i" } },
+    )
+    .then((data)=>{
+        res.json(data)
+    })
+    .catch((err)=>{
+        res.json(err)
+    })
+    
+})
+
+
 module.exports = router
