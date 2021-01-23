@@ -11,6 +11,10 @@
                     Add TODO
                 </button>
             </center>
+            <div class="pt-5">
+                <input v-model="search" class="form-control" name="search" placeholder="Todo Seach"
+                       type="text">
+            </div>
         </div>
         <div class="todos">
             <div class="row">
@@ -27,7 +31,7 @@
                             <button v-if="todo.status === 'TODO'" class="btn btn-primary mr-2"
                                     @click="todoProgress(todo._id)">Start
                             </button>
-                            <button v-if="todo.status === 'inProgress'" class="btn btn-primary mr-2"
+                            <button v-if="todo.status === 'inProgress'" class="btn btn-success mr-2"
                                     @click="todoDone(todo._id)">Done
                             </button>
                             <button class="btn mr-2" @click="deleteTodo(todo._id)">Remove</button>
@@ -63,7 +67,7 @@
                         </div>
                         <div class="form-group">
                             <label for="">DeadLine</label>
-                            <input v-model="newTodo.date" class="form-control" name="deadline" placeholder="Todo DeadLine"
+                            <input v-model="newTodo.deadline" class="form-control" name="deadline" placeholder="Todo DeadLine"
                                    type="text">
                         </div>
                         <button class="btn btn-primary mt-3" data-dismiss="modal" @click="addTodo">Add New TODO</button>
@@ -99,7 +103,7 @@
                         </div>
                         <div class="form-group">
                             <label for="">DeadLine</label>
-                            <input v-model="todoEditing.date" class="form-control" name="deadline" placeholder="Todo DeadLine"
+                            <input v-model="todoEditing.deadline" class="form-control" name="deadline" placeholder="Todo DeadLine"
                                    type="text">
                         </div>
                         <button class="btn btn-primary mt-3" data-dismiss="modal" @click="edit()">Edit TODO</button>
@@ -121,16 +125,17 @@ export default {
     data() {
         return {
             allTodos: null,
+            search : null,
             newTodo: {
                 title: null,
                 description: null,
-                date: null
+                deadline: null
             },
             todoEditing: {
                 id: null,
                 title: null,
                 description: null,
-                date: null
+                deadline: null
             }
         }
     },
@@ -139,13 +144,13 @@ export default {
             axios.post("http://localhost:3000/addTodo", {
                 title: this.newTodo.title,
                 description: this.newTodo.description,
-                deadline: this.newTodo.date
+                deadline: this.newTodo.deadline
             })
                 .then((res) => {
                     this.allTodos.push(res.data)
                     this.newTodo.title = null
                     this.newTodo.description = null
-                    this.newTodo.date = null
+                    this.newTodo.deadline = null
                     console.log(res)
                 })
                 .catch((err) => {
@@ -187,13 +192,20 @@ export default {
         },
         isEditing(id) {
             this.todoEditing.id = id
+            this.allTodos.forEach((ele)=>{
+                if(ele._id == id){
+                    this.todoEditing.title = ele.title
+                    this.todoEditing.description = ele.description
+                    this.todoEditing.deadline = ele.deadline
+                }
+            })
         },
         edit() {
                 axios.put("http://localhost:3000/todoupdate/", {
                         id: this.todoEditing.id,
                         title: this.todoEditing.title,
                         description: this.todoEditing.description,
-                        deadline: this.todoEditing.date
+                        deadline: this.todoEditing.deadline
                     }
                 )
                     .then((res) => {
@@ -201,7 +213,7 @@ export default {
                         this.todoEditing.id = null
                         this.todoEditing.title = null
                         this.todoEditing.description = null
-                        this.todoEditing.date = null
+                        this.todoEditing.deadline = null
                     })
                     .catch((err) => {
                         console.log(err)
@@ -217,6 +229,29 @@ export default {
             .catch((err) => {
                 console.log(err)
             })
+    },
+    watch : {
+        search : function (){
+            if(!this.search){
+                axios.get("http://localhost:3000/")
+                    .then((res) => {
+                        this.allTodos = res.data
+                    })
+                    .catch((err) => {
+                        console.log(err)
+                    })
+            }
+            else {
+                axios.get(`http://localhost:3000/search/${this.search}`)
+                    .then((res)=>{
+                        this.allTodos = res.data
+                    })
+                    .catch((err)=>{
+                        console.log(err)
+                    })
+            }
+
+        }
     }
 }
 </script>
