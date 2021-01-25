@@ -1,6 +1,7 @@
 const express = require("express")
 const app = express()
 const mongoose = require("mongoose")
+const cors = require("cors")
 
 mongoose.connect("mongodb://localhost:27017/TODO", { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false, useCreateIndex: true}, ()=>{
     console.log("Database Connected")
@@ -9,6 +10,7 @@ mongoose.connect("mongodb://localhost:27017/TODO", { useNewUrlParser: true, useU
 
 const home = require("./Routers/home")
 // app.use(express.static('./public'))
+app.use(cors())
 app.use(express.json())
 app.use("/", home)
 
